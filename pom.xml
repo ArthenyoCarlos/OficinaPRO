@@ -73,6 +73,12 @@
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
+        <!-- audit -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-envers</artifactId>
+        </dependency>
+
         <!-- Development -->
         <dependency>
             <groupId>org.projectlombok</groupId>

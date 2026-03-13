@@ -1,3 +1,10 @@
 spring:
   application:
     name: oficinapro
+  profiles:
+    active: dev
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    table: tb_flyway_schema_history

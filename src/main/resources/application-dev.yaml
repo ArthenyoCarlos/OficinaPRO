@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:oficinapro}
+    username: ${POSTGRES_USER:oficinapro}
+    password: ${POSTGRES_PASSWORD:oficinapro123}
+  jpa:
+    open-in-view: false
+    properties:
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _AUD
+            revision_field_name: REV
+            revision_type_field_name: REVTYPE
+            store_data_at_delete: true
