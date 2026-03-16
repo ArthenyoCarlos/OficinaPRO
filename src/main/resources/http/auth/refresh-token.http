@@ -1,16 +1,10 @@
 @baseUrl = http://localhost:8080
 @username = admin
-@password = 123456
 
-### Login
-POST {{baseUrl}}/auth/signin
-Content-Type: application/json
+### Refresh token
+PUT {{baseUrl}}/auth/refresh/{{username}}
+Authorization: {{refreshToken}}
 Accept: application/json
-
-{
-  "username": "{{username}}",
-  "password": "{{password}}"
-}
 
 > {%
 client.global.set("token", response.body.body.accessToken);

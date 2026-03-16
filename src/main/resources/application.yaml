@@ -14,3 +14,7 @@ security:
     token:
       secret-key: ${JWT_SECRET_KEY:C0jUHtE5GrISxTyD2j5N0Cg7aHs7EG+UaakLEyhYAe7R65CnItpwUUKVvG6aVXZmspj3KO4kECzHjSocMNi/QQ==}
       expire-length: 3600000
+
+logging:
+  level:
+    br.com.oficinapro: INFO

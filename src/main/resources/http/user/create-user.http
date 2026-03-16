@@ -1,0 +1,17 @@
+@baseUrl = http://localhost:8080
+
+### Create user
+POST {{baseUrl}}/api/v1/user
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "john.doe",
+  "fullName": "John Doe",
+  "email": "john.doe@email.com",
+  "password": "123456",
+  "roles": [
+    "ROLE_ADMIN"
+  ]
+}
