@@ -11,3 +11,18 @@ Accept: application/json
   "username": "{{username}}",
   "password": "{{password}}"
 }
+
+> {%
+client.global.set("token", response.body.token);
+client.global.set("refreshToken", response.body.refreshToken);
+%}
+
+### Refresh token
+PUT {{baseUrl}}/auth/refresh/{{username}}
+Authorization: {{refreshToken}}
+Accept: application/json
+
+> {%
+client.global.set("token", response.body.token);
+client.global.set("refreshToken", response.body.refreshToken);
+%}
