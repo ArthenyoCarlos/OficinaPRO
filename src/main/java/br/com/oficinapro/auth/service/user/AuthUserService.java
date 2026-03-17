@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class AuthUserService implements UserDetailsService {
 
     @Audited
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public AuthUserService(UserRepository userRepository) {
         this.userRepository = userRepository;

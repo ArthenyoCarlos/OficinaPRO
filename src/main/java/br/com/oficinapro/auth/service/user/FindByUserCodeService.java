@@ -3,23 +3,24 @@ package br.com.oficinapro.auth.service.user;
 import br.com.oficinapro.auth.domain.User;
 import br.com.oficinapro.auth.dto.user.response.UserResponseDTO;
 import br.com.oficinapro.auth.reposirory.UserRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class FindAllUserService {
+public class FindByUserCodeService {
 
     private final UserRepository userRepository;
 
-    public FindAllUserService(UserRepository userRepository) {
+    public FindByUserCodeService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponseDTO> findAll(boolean enabled, Pageable pageable){
-        Page<User> users = userRepository.findAll(enabled, pageable);
-        return users.map(x -> new UserResponseDTO(x));
+    public UserResponseDTO findByCode(String code){
+        User user = userRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with code: " + code));
+
+        return new UserResponseDTO(user);
     }
 }
