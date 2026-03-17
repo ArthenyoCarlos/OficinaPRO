@@ -1,10 +1,7 @@
 package br.com.oficinapro.common.audit.entity;
 
 import br.com.oficinapro.common.audit.base.BaseAuditEntity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +18,7 @@ public abstract class BaseEntity extends BaseAuditEntity implements Serializable
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(unique = true, nullable = false)
+    private String code;
 }

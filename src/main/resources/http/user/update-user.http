@@ -1,16 +1,16 @@
 @baseUrl = http://localhost:8080
 
 ### Create user
-POST {{baseUrl}}/api/v1/user
+PUT {{baseUrl}}/api/v1/user/1
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
   "username": "arthenyo",
-  "fullName": "arthenyo carlos",
-  "email": "arthenyo@gmail.com",
-  "password": "arthenyo",
+  "fullName": "Arthenyo Carlos Gonçalves Bandeira de Araújo",
+  "email": "arthenyocarlos19@gmail.com",
+  "password": "SUP@center2050",
   "roles": [
     "ROLE_ADMIN"
   ]

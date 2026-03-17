@@ -9,4 +9,5 @@ public record UserRequestDTO(
         String password,
         List<String> roles
 ) {
+
 }

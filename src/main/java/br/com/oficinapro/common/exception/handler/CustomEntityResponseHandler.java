@@ -4,6 +4,7 @@ import br.com.oficinapro.common.exception.BusinessException;
 import br.com.oficinapro.common.exception.ExceptionResponse;
 import br.com.oficinapro.common.exception.InvalidJwtAuthenticationException;
 import br.com.oficinapro.common.exception.ResourceConflictException;
+import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -54,6 +55,22 @@ public class CustomEntityResponseHandler extends ResponseEntityExceptionHandler 
             WebRequest request
     ){
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        ExceptionResponse response = new ExceptionResponse(
+                ex.getMessage(),
+                status.value(),
+                request.getDescription(false).replace("uri=", ""),
+                OffsetDateTime.now().toString(),
+                status.getReasonPhrase()
+        );
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public final ResponseEntity<ExceptionResponse> handleResourceNotFoundException(
+            ResourceNotFoundException ex,
+            WebRequest request
+    ) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
         ExceptionResponse response = new ExceptionResponse(
                 ex.getMessage(),
                 status.value(),

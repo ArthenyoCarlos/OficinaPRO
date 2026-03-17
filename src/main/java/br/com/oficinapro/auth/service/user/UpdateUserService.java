@@ -10,20 +10,21 @@ import br.com.oficinapro.auth.reposirory.UserRepository;
 import br.com.oficinapro.auth.service.auth.AuthService;
 import br.com.oficinapro.common.exception.BusinessException;
 import br.com.oficinapro.common.exception.ResourceConflictException;
+import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class CreateUserService {
+public class UpdateUserService {
 
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final AuthService authService;
     private final UserMapper userMapper;
 
-    public CreateUserService(
+    public UpdateUserService(
             UserRepository userRepository,
             PermissionRepository permissionRepository,
             AuthService authService,
@@ -36,33 +37,53 @@ public class CreateUserService {
     }
 
     @Transactional
-    public UserResponseDTO create(UserRequestDTO userRequestDTO) {
-        validateUsernameUniqueness(userRequestDTO.username());
-        validateEmailUniqueness(userRequestDTO.email());
+    public UserResponseDTO update(String code, UserRequestDTO userRequestDTO) {
+        User user = userRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        User user = mapToUser(userRequestDTO);
-        user.setPassword(authService.generateHashedPassword(userRequestDTO.password()));
-        user.setPermissions(resolvePermissions(userRequestDTO.roles()));
-        applySecurityDefaults(user);
+        updateUsername(user, userRequestDTO.username());
+        updateEmail(user, userRequestDTO.email());
 
-        User savedUser = userRepository.save(user);
-        return mapToResponse(savedUser);
-    }
-
-    private void validateUsernameUniqueness(String username) {
-        if (userRepository.findByUsername(username) != null) {
-            throw new ResourceConflictException( "Username already exists");
+        if (userRequestDTO.fullName() != null) {
+            user.setFullName(userRequestDTO.fullName());
         }
+
+        if (userRequestDTO.password() != null && !userRequestDTO.password().isBlank()) {
+            user.setPassword(authService.generateHashedPassword(userRequestDTO.password()));
+        }
+
+        if (userRequestDTO.roles() != null) {
+            user.setPermissions(resolvePermissions(userRequestDTO.roles()));
+        }
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toResponse(updatedUser);
     }
 
-    private void validateEmailUniqueness(String email) {
-        if (userRepository.findByEmail(email) != null) {
+    private void updateUsername(User user, String username) {
+        if (username == null || username.equals(user.getUsername())) {
+            return;
+        }
+
+        User existingUser = userRepository.findByUsername(username);
+        if (existingUser != null && !existingUser.getId().equals(user.getId())) {
+            throw new ResourceConflictException("Username already exists");
+        }
+
+        user.setUsername(username);
+    }
+
+    private void updateEmail(User user, String email) {
+        if (email == null || email.equals(user.getEmail())) {
+            return;
+        }
+
+        User existingUser = userRepository.findByEmail(email);
+        if (existingUser != null && !existingUser.getId().equals(user.getId())) {
             throw new ResourceConflictException("Email already exists");
         }
-    }
 
-    private User mapToUser(UserRequestDTO userRequestDTO) {
-        return userMapper.toEntity(userRequestDTO);
+        user.setEmail(email);
     }
 
     private List<Permission> resolvePermissions(List<String> roles) {
@@ -75,14 +96,4 @@ public class CreateUserService {
         return permissions;
     }
 
-    private void applySecurityDefaults(User user) {
-        user.setAccountNonExpired(true);
-        user.setAccountNonLocked(true);
-        user.setCredentialsNonExpired(true);
-        user.setEnabled(true);
-    }
-
-    private UserResponseDTO mapToResponse(User user) {
-        return userMapper.toResponse(user);
-    }
 }
