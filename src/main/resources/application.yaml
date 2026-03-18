@@ -17,4 +17,4 @@ security:
 
 logging:
   level:
-    br.com.oficinapro: INFO
+    br.com.oficinapro: DEBUG

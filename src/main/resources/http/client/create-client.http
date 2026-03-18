@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Create client
+POST {{baseUrl}}/api/v1/clients
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Arthenyo Carlos",
+  "cpfCnpj": "123.456.789-00",
+  "email": "arthenyo@gmail.com",
+  "phone": "(11) 99999-9999",
+  "address": "Rua das Oficinas, 123",
+  "city": "Sao Paulo",
+  "state": "SP",
+  "zipCode": "01001-000",
+  "observation": "Cliente criado via arquivo http"
+}

@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Create client
+PUT {{baseUrl}}/api/v1/clients/9
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Arthenyo Carlos Gonçalves Bandeira de Araújo",
+  "cpfCnpj": "090.954.264-32",
+  "email": "arthenyocarlos19@gmail.com",
+  "phone": "(11) 99999-9999",
+  "address": "Rua das Oficinas, 123",
+  "city": "são João do Rio do Peixe",
+  "state": "PB",
+  "zipCode": "58910-000",
+  "observation": "Cliente criado via arquivo http"
+}
