@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Find By clients
+GET {{baseUrl}}/api/v1/clients/9
+Accept: application/json
+Authorization: Bearer {{token}}

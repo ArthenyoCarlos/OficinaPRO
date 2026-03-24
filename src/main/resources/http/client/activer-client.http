@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Create Client
+PUT {{baseUrl}}/api/v1/clients/1/active
+Accept: application/json
+Authorization: Bearer {{token}}
