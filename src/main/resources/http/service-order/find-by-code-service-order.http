@@ -1,6 +1,7 @@
 @baseUrl = http://localhost:8080
+@serviceOrderCode = 1
 
 ### Find by code service order
-GET {{baseUrl}}/api/v1/service-orders/1
+GET {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}
 Accept: application/json
 Authorization: Bearer {{token}}

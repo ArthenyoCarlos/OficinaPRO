@@ -1,6 +1,5 @@
 package br.com.oficinapro.ordemservico.dto.request;
 
-import br.com.oficinapro.financeiro.domain.enums.FinancialStatus;
 import br.com.oficinapro.ordemservico.domain.enums.ApprovalMethod;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
 import jakarta.validation.Valid;
@@ -56,17 +55,6 @@ public record ServiceOrderRequest(
 
         @DecimalMin(value = "0.0", inclusive = true, message = "Discount must be zero or greater")
         BigDecimal discount,
-
-        @DecimalMin(value = "0.0", inclusive = true, message = "Total parts must be zero or greater")
-        BigDecimal totalParts,
-
-        @DecimalMin(value = "0.0", inclusive = true, message = "Total services must be zero or greater")
-        BigDecimal totalServices,
-
-        @DecimalMin(value = "0.0", inclusive = true, message = "Total amount must be zero or greater")
-        BigDecimal totalAmount,
-
-        FinancialStatus financialStatus,
 
         @Size(max = 255, message = "Approved by code must be less than 255 characters")
         String approvedByCode,

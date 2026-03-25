@@ -1,12 +1,15 @@
 @baseUrl = http://localhost:8080
+@serviceOrderCode = 1
+@userCode = 1
 
 ### Finish service order
-PATCH {{baseUrl}}/api/v1/service-orders/1/finish
+### This action performs the stock output for product items
+PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/finish
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "changedByCode": "1",
+  "changedByCode": "{{userCode}}",
   "notes": "Servico finalizado e pronto para retirada"
 }

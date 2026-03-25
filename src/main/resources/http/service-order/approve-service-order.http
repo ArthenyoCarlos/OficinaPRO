@@ -1,13 +1,16 @@
 @baseUrl = http://localhost:8080
+@serviceOrderCode = 1
+@userCode = 1
 
 ### Approve service order
-PATCH {{baseUrl}}/api/v1/service-orders/1/approve
+### Use only when the order is in WAITING_APPROVAL
+PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/approve
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "approvedByCode": "1",
+  "approvedByCode": "{{userCode}}",
   "approvalMethod": "WHATSAPP",
   "approvalNotes": "Cliente aprovou o orcamento"
 }

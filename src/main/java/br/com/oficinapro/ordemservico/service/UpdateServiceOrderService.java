@@ -116,8 +116,8 @@ public class UpdateServiceOrderService {
     private void validateFinishedOrderRestrictions(br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus currentStatus,
                                                    ServiceOrderRequest request) {
         if (currentStatus == br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.FINISHED
-                && request.productItems() != null) {
-            throw new BusinessException("Cannot change product items of a finished service order");
+                || currentStatus == br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.DELIVERED) {
+            throw new BusinessException("Cannot update a service order with status " + currentStatus + " using PUT");
         }
     }
 

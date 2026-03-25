@@ -1,12 +1,15 @@
 @baseUrl = http://localhost:8080
+@serviceOrderCode = 1
+@userCode = 1
 
 ### Deliver service order
-PATCH {{baseUrl}}/api/v1/service-orders/1/deliver
+### Use only when the order is already FINISHED
+PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/deliver
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "changedByCode": "1",
+  "changedByCode": "{{userCode}}",
   "notes": "Veiculo entregue ao cliente"
 }
