@@ -22,15 +22,21 @@ public class CreateReceiptService {
     private final ReceiptMapper receiptMapper;
     private final ServiceOrderRepository serviceOrderRepository;
     private final UserRepository userRepository;
+    private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
+    private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
 
     public CreateReceiptService(ReceiptRepository receiptRepository,
                                 ReceiptMapper receiptMapper,
                                 ServiceOrderRepository serviceOrderRepository,
-                                UserRepository userRepository) {
+                                UserRepository userRepository,
+                                ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
+                                ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
         this.receiptRepository = receiptRepository;
         this.receiptMapper = receiptMapper;
         this.serviceOrderRepository = serviceOrderRepository;
         this.userRepository = userRepository;
+        this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
+        this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
     }
 
     @Transactional
@@ -39,8 +45,10 @@ public class CreateReceiptService {
         receipt.setServiceOrder(findServiceOrder(request.serviceOrderCode()));
         receipt.setReceivedBy(findUser(request.receivedByCode()));
         receipt.setReceiptDate(request.receiptDate() != null ? request.receiptDate() : LocalDateTime.now());
-
-        return receiptMapper.toResponse(receiptRepository.save(receipt));
+        serviceOrderReceiptValidationService.validateStandaloneReceipt(receipt.getServiceOrder(), receipt.getAmount(), null);
+        Receipt saved = receiptRepository.save(receipt);
+        serviceOrderFinancialStatusService.recalculateAndSave(saved.getServiceOrder());
+        return receiptMapper.toResponse(saved);
     }
 
     private ServiceOrder findServiceOrder(String code) {

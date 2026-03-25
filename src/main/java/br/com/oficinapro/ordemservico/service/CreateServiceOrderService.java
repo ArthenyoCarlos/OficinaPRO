@@ -4,8 +4,11 @@ import br.com.oficinapro.auth.domain.User;
 import br.com.oficinapro.auth.reposirory.UserRepository;
 import br.com.oficinapro.cliente.domain.Client;
 import br.com.oficinapro.cliente.repository.ClientRepository;
+import br.com.oficinapro.common.exception.BusinessException;
 import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import br.com.oficinapro.financeiro.domain.Receipt;
+import br.com.oficinapro.financeiro.service.ServiceOrderFinancialStatusService;
+import br.com.oficinapro.financeiro.service.ServiceOrderReceiptValidationService;
 import br.com.oficinapro.ordemservico.domain.ServiceOrder;
 import br.com.oficinapro.ordemservico.domain.ServiceOrderProductItem;
 import br.com.oficinapro.ordemservico.domain.ServiceOrderServiceItem;
@@ -26,6 +29,7 @@ import br.com.oficinapro.veiculo.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +44,8 @@ public class CreateServiceOrderService {
     private final UserRepository userRepository;
     private final ServicesRepository servicesRepository;
     private final ProductRepository productRepository;
+    private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
+    private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
 
     public CreateServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                      ServiceOrderMapper serviceOrderMapper,
@@ -47,7 +53,9 @@ public class CreateServiceOrderService {
                                      VehicleRepository vehicleRepository,
                                      UserRepository userRepository,
                                      ServicesRepository servicesRepository,
-                                     ProductRepository productRepository) {
+                                     ProductRepository productRepository,
+                                     ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
+                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.serviceOrderMapper = serviceOrderMapper;
         this.clientRepository = clientRepository;
@@ -55,10 +63,14 @@ public class CreateServiceOrderService {
         this.userRepository = userRepository;
         this.servicesRepository = servicesRepository;
         this.productRepository = productRepository;
+        this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
+        this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
     }
 
     @Transactional
     public ServiceOrderResponse create(ServiceOrderRequest request) {
+        validateInitialStatus(request);
+
         ServiceOrder serviceOrder = serviceOrderMapper.toEntity(request);
         serviceOrder.setNumber(generateNumber());
         serviceOrder.setOpenedAt(request.openedAt() != null ? request.openedAt() : LocalDateTime.now());
@@ -67,10 +79,19 @@ public class CreateServiceOrderService {
         serviceOrder.setServiceItems(mapServiceItems(request.serviceItems(), serviceOrder));
         serviceOrder.setProductItems(mapProductItems(request.productItems(), serviceOrder));
         serviceOrder.setReceipts(mapReceipts(request.receipts(), serviceOrder));
+        calculateTotals(serviceOrder, request);
+        serviceOrderReceiptValidationService.validateServiceOrderReceipts(serviceOrder);
+        serviceOrderFinancialStatusService.recalculate(serviceOrder);
         serviceOrder.setStatusHistory(buildInitialStatusHistory(serviceOrder));
 
         ServiceOrder saved = serviceOrderRepository.save(serviceOrder);
         return new ServiceOrderResponse(saved);
+    }
+
+    private void validateInitialStatus(ServiceOrderRequest request) {
+        if (request.status() != br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.OPEN) {
+            throw new BusinessException("Service order must be created with status OPEN");
+        }
     }
 
     private void assignMainReferences(ServiceOrder serviceOrder, ServiceOrderRequest request) {
@@ -100,9 +121,9 @@ public class CreateServiceOrderService {
             item.setService(service);
             item.setComplementaryDescription(request.complementaryDescription());
             item.setQuantity(request.quantity());
-            item.setUnitPrice(request.unitPrice());
-            item.setDiscount(request.discount());
-            item.setTotalAmount(request.totalAmount());
+            item.setUnitPrice(resolveServiceUnitPrice(request, service));
+            item.setDiscount(defaultZero(request.discount()));
+            item.setTotalAmount(calculateItemTotal(item.getUnitPrice(), item.getQuantity(), item.getDiscount()));
             item.setResponsibleTechnician(findUserByCode(request.responsibleTechnicianCode(), "Responsible technician"));
             items.add(item);
         }
@@ -124,9 +145,9 @@ public class CreateServiceOrderService {
             item.setServiceOrder(serviceOrder);
             item.setProduct(product);
             item.setQuantity(request.quantity());
-            item.setUnitPrice(request.unitPrice());
-            item.setDiscount(request.discount());
-            item.setTotalAmount(request.totalAmount());
+            item.setUnitPrice(resolveProductUnitPrice(request, product));
+            item.setDiscount(defaultZero(request.discount()));
+            item.setTotalAmount(calculateItemTotal(item.getUnitPrice(), item.getQuantity(), item.getDiscount()));
             items.add(item);
         }
 
@@ -171,6 +192,41 @@ public class CreateServiceOrderService {
 
         return userRepository.findByCode(code.trim())
                 .orElseThrow(() -> new ResourceNotFoundException(fieldName + " user not found with code: " + code));
+    }
+
+    private void calculateTotals(ServiceOrder serviceOrder, ServiceOrderRequest request) {
+        BigDecimal totalServices = serviceOrder.getServiceItems().stream()
+                .map(ServiceOrderServiceItem::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalParts = serviceOrder.getProductItems().stream()
+                .map(ServiceOrderProductItem::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal discount = defaultZero(request.discount());
+
+        serviceOrder.setDiscount(discount);
+        serviceOrder.setTotalServices(totalServices);
+        serviceOrder.setTotalParts(totalParts);
+        serviceOrder.setTotalAmount(totalServices.add(totalParts).subtract(discount).max(BigDecimal.ZERO));
+    }
+
+    private BigDecimal resolveServiceUnitPrice(ServiceOrderServiceItemRequest request, Services service) {
+        return request.unitPrice() != null ? request.unitPrice() : defaultZero(service.getDefaultPrice());
+    }
+
+    private BigDecimal resolveProductUnitPrice(ServiceOrderProductItemRequest request, Product product) {
+        return request.unitPrice() != null ? request.unitPrice() : defaultZero(product.getSalePrice());
+    }
+
+    private BigDecimal calculateItemTotal(BigDecimal unitPrice, Integer quantity, BigDecimal discount) {
+        return unitPrice.multiply(BigDecimal.valueOf(quantity.longValue()))
+                .subtract(defaultZero(discount))
+                .max(BigDecimal.ZERO);
+    }
+
+    private BigDecimal defaultZero(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
     }
 
     private String generateNumber() {

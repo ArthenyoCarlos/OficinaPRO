@@ -22,21 +22,28 @@ public class UpdateReceiptService {
     private final ReceiptMapper receiptMapper;
     private final ServiceOrderRepository serviceOrderRepository;
     private final UserRepository userRepository;
+    private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
+    private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
 
     public UpdateReceiptService(ReceiptRepository receiptRepository,
                                 ReceiptMapper receiptMapper,
                                 ServiceOrderRepository serviceOrderRepository,
-                                UserRepository userRepository) {
+                                UserRepository userRepository,
+                                ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
+                                ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
         this.receiptRepository = receiptRepository;
         this.receiptMapper = receiptMapper;
         this.serviceOrderRepository = serviceOrderRepository;
         this.userRepository = userRepository;
+        this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
+        this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
     }
 
     @Transactional
     public ReceiptResponse update(UUID id, ReceiptRequest request) {
         Receipt receipt = receiptRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Receipt not found with id: " + id));
+        ServiceOrder previousServiceOrder = receipt.getServiceOrder();
 
         receiptMapper.updateEntity(request, receipt);
         receipt.setServiceOrder(findServiceOrder(request.serviceOrderCode()));
@@ -44,8 +51,13 @@ public class UpdateReceiptService {
         if (request.receiptDate() != null) {
             receipt.setReceiptDate(request.receiptDate());
         }
-
-        return receiptMapper.toResponse(receiptRepository.save(receipt));
+        serviceOrderReceiptValidationService.validateStandaloneReceipt(receipt.getServiceOrder(), receipt.getAmount(), receipt.getId());
+        Receipt saved = receiptRepository.save(receipt);
+        if (previousServiceOrder != null && !previousServiceOrder.getId().equals(saved.getServiceOrder().getId())) {
+            serviceOrderFinancialStatusService.recalculateAndSave(previousServiceOrder);
+        }
+        serviceOrderFinancialStatusService.recalculateAndSave(saved.getServiceOrder());
+        return receiptMapper.toResponse(saved);
     }
 
     private ServiceOrder findServiceOrder(String code) {

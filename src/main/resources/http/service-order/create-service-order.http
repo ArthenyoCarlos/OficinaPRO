@@ -19,18 +19,13 @@ Authorization: Bearer {{token}}
   "fuelLevel": "1/2",
   "accessories": "Macaco, chave de roda, estepe",
   "discount": 20.00,
-  "totalParts": 150.00,
-  "totalServices": 120.00,
-  "totalAmount": 250.00,
   "financialStatus": "PENDING",
   "serviceItems": [
     {
       "serviceCode": "1",
       "complementaryDescription": "Troca de oleo e filtro",
       "quantity": 1,
-      "unitPrice": 120.00,
       "discount": 0.00,
-      "totalAmount": 120.00,
       "responsibleTechnicianCode": "1"
     }
   ],
@@ -38,9 +33,7 @@ Authorization: Bearer {{token}}
     {
       "productCode": "1",
       "quantity": 3,
-      "unitPrice": 50.00,
-      "discount": 0.00,
-      "totalAmount": 150.00
+      "discount": 0.00
     }
   ],
   "receipts": [

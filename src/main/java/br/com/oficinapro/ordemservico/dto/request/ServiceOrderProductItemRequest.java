@@ -18,14 +18,12 @@ public record ServiceOrderProductItemRequest(
         @Min(value = 1, message = "Quantity must be greater than zero")
         Integer quantity,
 
-        @NotNull(message = "Unit price is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Unit price must be zero or greater")
         BigDecimal unitPrice,
 
         @DecimalMin(value = "0.0", inclusive = true, message = "Discount must be zero or greater")
         BigDecimal discount,
 
-        @NotNull(message = "Total amount is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Total amount must be zero or greater")
         BigDecimal totalAmount
 ) {

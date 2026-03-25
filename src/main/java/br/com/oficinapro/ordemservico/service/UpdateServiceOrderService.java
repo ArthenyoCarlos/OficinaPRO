@@ -4,8 +4,12 @@ import br.com.oficinapro.auth.domain.User;
 import br.com.oficinapro.auth.reposirory.UserRepository;
 import br.com.oficinapro.cliente.domain.Client;
 import br.com.oficinapro.cliente.repository.ClientRepository;
+import br.com.oficinapro.common.exception.BusinessException;
 import br.com.oficinapro.common.exception.ResourceNotFoundException;
+import br.com.oficinapro.estoque.service.ServiceOrderStockService;
 import br.com.oficinapro.financeiro.domain.Receipt;
+import br.com.oficinapro.financeiro.service.ServiceOrderFinancialStatusService;
+import br.com.oficinapro.financeiro.service.ServiceOrderReceiptValidationService;
 import br.com.oficinapro.ordemservico.domain.ServiceOrder;
 import br.com.oficinapro.ordemservico.domain.ServiceOrderProductItem;
 import br.com.oficinapro.ordemservico.domain.ServiceOrderServiceItem;
@@ -26,6 +30,7 @@ import br.com.oficinapro.veiculo.repository.VehicleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +45,9 @@ public class UpdateServiceOrderService {
     private final UserRepository userRepository;
     private final ServicesRepository servicesRepository;
     private final ProductRepository productRepository;
+    private final ServiceOrderStockService serviceOrderStockService;
+    private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
+    private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
 
     public UpdateServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                      ServiceOrderMapper serviceOrderMapper,
@@ -47,7 +55,10 @@ public class UpdateServiceOrderService {
                                      VehicleRepository vehicleRepository,
                                      UserRepository userRepository,
                                      ServicesRepository servicesRepository,
-                                     ProductRepository productRepository) {
+                                     ProductRepository productRepository,
+                                     ServiceOrderStockService serviceOrderStockService,
+                                     ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
+                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.serviceOrderMapper = serviceOrderMapper;
         this.clientRepository = clientRepository;
@@ -55,6 +66,9 @@ public class UpdateServiceOrderService {
         this.userRepository = userRepository;
         this.servicesRepository = servicesRepository;
         this.productRepository = productRepository;
+        this.serviceOrderStockService = serviceOrderStockService;
+        this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
+        this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
     }
 
     @Transactional
@@ -63,14 +77,26 @@ public class UpdateServiceOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Service order not found with code: " + code));
 
         var previousStatus = serviceOrder.getStatus();
+        validateStatusTransition(previousStatus, request.status());
+        validateFinishedOrderRestrictions(previousStatus, request);
 
         serviceOrderMapper.updateEntity(request, serviceOrder);
         serviceOrder.setOpenedAt(request.openedAt() != null ? request.openedAt() : serviceOrder.getOpenedAt());
         assignMainReferences(serviceOrder, request);
         replaceServiceItems(serviceOrder, request.serviceItems());
         replaceProductItems(serviceOrder, request.productItems());
-        replaceReceipts(serviceOrder, request.receipts());
+        if (request.receipts() != null) {
+            replaceReceipts(serviceOrder, request.receipts());
+        }
+        calculateTotals(serviceOrder, request);
+        serviceOrderReceiptValidationService.validateServiceOrderReceipts(serviceOrder);
+        serviceOrderFinancialStatusService.recalculate(serviceOrder);
         normalizeFields(serviceOrder);
+
+        if (previousStatus != br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.FINISHED
+                && serviceOrder.getStatus() == br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.FINISHED) {
+            serviceOrderStockService.outputProducts(serviceOrder, serviceOrder.getResponsibleTechnician());
+        }
 
         if (previousStatus != serviceOrder.getStatus()) {
             serviceOrder.getStatusHistory().add(buildStatusHistory(serviceOrder, previousStatus));
@@ -78,6 +104,21 @@ public class UpdateServiceOrderService {
 
         ServiceOrder updated = serviceOrderRepository.save(serviceOrder);
         return new ServiceOrderResponse(updated);
+    }
+
+    private void validateStatusTransition(br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus currentStatus,
+                                          br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus newStatus) {
+        if (!currentStatus.canTransitionTo(newStatus)) {
+            throw new BusinessException("Invalid status transition from " + currentStatus + " to " + newStatus);
+        }
+    }
+
+    private void validateFinishedOrderRestrictions(br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus currentStatus,
+                                                   ServiceOrderRequest request) {
+        if (currentStatus == br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus.FINISHED
+                && request.productItems() != null) {
+            throw new BusinessException("Cannot change product items of a finished service order");
+        }
     }
 
     private void assignMainReferences(ServiceOrder serviceOrder, ServiceOrderRequest request) {
@@ -107,9 +148,9 @@ public class UpdateServiceOrderService {
             item.setService(service);
             item.setComplementaryDescription(request.complementaryDescription());
             item.setQuantity(request.quantity());
-            item.setUnitPrice(request.unitPrice());
-            item.setDiscount(request.discount());
-            item.setTotalAmount(request.totalAmount());
+            item.setUnitPrice(resolveServiceUnitPrice(request, service));
+            item.setDiscount(defaultZero(request.discount()));
+            item.setTotalAmount(calculateItemTotal(item.getUnitPrice(), item.getQuantity(), item.getDiscount()));
             item.setResponsibleTechnician(findUserByCode(request.responsibleTechnicianCode(), "Responsible technician"));
             serviceOrder.getServiceItems().add(item);
         }
@@ -129,9 +170,9 @@ public class UpdateServiceOrderService {
             item.setServiceOrder(serviceOrder);
             item.setProduct(product);
             item.setQuantity(request.quantity());
-            item.setUnitPrice(request.unitPrice());
-            item.setDiscount(request.discount());
-            item.setTotalAmount(request.totalAmount());
+            item.setUnitPrice(resolveProductUnitPrice(request, product));
+            item.setDiscount(defaultZero(request.discount()));
+            item.setTotalAmount(calculateItemTotal(item.getUnitPrice(), item.getQuantity(), item.getDiscount()));
             serviceOrder.getProductItems().add(item);
         }
     }
@@ -172,6 +213,41 @@ public class UpdateServiceOrderService {
 
         return userRepository.findByCode(code.trim())
                 .orElseThrow(() -> new ResourceNotFoundException(fieldName + " user not found with code: " + code));
+    }
+
+    private void calculateTotals(ServiceOrder serviceOrder, ServiceOrderRequest request) {
+        BigDecimal totalServices = serviceOrder.getServiceItems().stream()
+                .map(ServiceOrderServiceItem::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalParts = serviceOrder.getProductItems().stream()
+                .map(ServiceOrderProductItem::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal discount = defaultZero(request.discount());
+
+        serviceOrder.setDiscount(discount);
+        serviceOrder.setTotalServices(totalServices);
+        serviceOrder.setTotalParts(totalParts);
+        serviceOrder.setTotalAmount(totalServices.add(totalParts).subtract(discount).max(BigDecimal.ZERO));
+    }
+
+    private BigDecimal resolveServiceUnitPrice(ServiceOrderServiceItemRequest request, Services service) {
+        return request.unitPrice() != null ? request.unitPrice() : defaultZero(service.getDefaultPrice());
+    }
+
+    private BigDecimal resolveProductUnitPrice(ServiceOrderProductItemRequest request, Product product) {
+        return request.unitPrice() != null ? request.unitPrice() : defaultZero(product.getSalePrice());
+    }
+
+    private BigDecimal calculateItemTotal(BigDecimal unitPrice, Integer quantity, BigDecimal discount) {
+        return unitPrice.multiply(BigDecimal.valueOf(quantity.longValue()))
+                .subtract(defaultZero(discount))
+                .max(BigDecimal.ZERO);
+    }
+
+    private BigDecimal defaultZero(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
     }
 
     private void normalizeFields(ServiceOrder serviceOrder) {

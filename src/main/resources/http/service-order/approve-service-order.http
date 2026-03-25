@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:8080
+
+### Approve service order
+PATCH {{baseUrl}}/api/v1/service-orders/1/approve
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "approvedByCode": "1",
+  "approvalMethod": "WHATSAPP",
+  "approvalNotes": "Cliente aprovou o orcamento"
+}

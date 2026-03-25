@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:8080
+
+### Cancel service order
+PATCH {{baseUrl}}/api/v1/service-orders/1/cancel
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "changedByCode": "1",
+  "notes": "Cliente desistiu do atendimento"
+}
