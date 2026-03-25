@@ -1,0 +1,12 @@
+@baseUrl = http://localhost:8080
+
+### Update product category
+PUT {{baseUrl}}/api/v1/product-categories/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Lubrificantes Premium",
+  "description": "Categoria atualizada via arquivo http"
+}

@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Activate product category
+PATCH {{baseUrl}}/api/v1/product-categories/1/active
+Accept: application/json
+Authorization: Bearer {{token}}
