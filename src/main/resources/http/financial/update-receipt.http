@@ -1,15 +1,19 @@
 @baseUrl = http://localhost:8080
+@receiptId = 00000000-0000-0000-0000-000000000001
+@serviceOrderCode = 1
+@userCode = 1
 
 ### Update receipt
-PUT {{baseUrl}}/api/v1/receipts/00000000-0000-0000-0000-000000000001
+### Keep serviceOrderCode coherent to avoid moving the receipt to another order by mistake
+PUT {{baseUrl}}/api/v1/receipts/{{receiptId}}
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "serviceOrderCode": "1",
+  "serviceOrderCode": "{{serviceOrderCode}}",
   "amount": 200.00,
   "paymentMethod": "CREDIT_CARD",
   "notes": "Pagamento ajustado",
-  "receivedByCode": "1"
+  "receivedByCode": "{{userCode}}"
 }

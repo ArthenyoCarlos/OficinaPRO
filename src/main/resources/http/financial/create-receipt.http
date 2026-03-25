@@ -1,15 +1,18 @@
 @baseUrl = http://localhost:8080
+@serviceOrderCode = 1
+@userCode = 1
 
 ### Create receipt
+### Use this when the receipt will be created outside the service-order payload
 POST {{baseUrl}}/api/v1/receipts
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "serviceOrderCode": "1",
+  "serviceOrderCode": "{{serviceOrderCode}}",
   "amount": 150.00,
   "paymentMethod": "PIX",
   "notes": "Pagamento parcial",
-  "receivedByCode": "1"
+  "receivedByCode": "{{userCode}}"
 }

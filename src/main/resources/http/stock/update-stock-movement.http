@@ -1,13 +1,17 @@
 @baseUrl = http://localhost:8080
+@stockMovementId = 00000000-0000-0000-0000-000000000001
+@productCode = 1
+@userCode = 1
 
 ### Update stock movement
-PUT {{baseUrl}}/api/v1/stock-movements/00000000-0000-0000-0000-000000000001
+### Manual stock endpoint. Prefer creating a new movement instead of changing history when possible.
+PUT {{baseUrl}}/api/v1/stock-movements/{{stockMovementId}}
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "productCode": "1",
+  "productCode": "{{productCode}}",
   "movementType": "EXIT",
   "originType": "MANUAL_ADJUSTMENT",
   "quantity": 5,
@@ -15,5 +19,5 @@ Authorization: Bearer {{token}}
   "laterBalance": 25,
   "unitCost": 15.50,
   "notes": "Saida manual de estoque",
-  "movedByCode": "1"
+  "movedByCode": "{{userCode}}"
 }

@@ -1,6 +1,7 @@
 @baseUrl = http://localhost:8080
+@receiptId = 00000000-0000-0000-0000-000000000001
 
 ### Delete receipt
-DELETE {{baseUrl}}/api/v1/receipts/00000000-0000-0000-0000-000000000001
+DELETE {{baseUrl}}/api/v1/receipts/{{receiptId}}
 Accept: application/json
 Authorization: Bearer {{token}}

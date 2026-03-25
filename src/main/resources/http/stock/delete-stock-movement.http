@@ -1,6 +1,7 @@
 @baseUrl = http://localhost:8080
+@stockMovementId = 00000000-0000-0000-0000-000000000001
 
 ### Delete stock movement
-DELETE {{baseUrl}}/api/v1/stock-movements/00000000-0000-0000-0000-000000000001
+DELETE {{baseUrl}}/api/v1/stock-movements/{{stockMovementId}}
 Accept: application/json
 Authorization: Bearer {{token}}
