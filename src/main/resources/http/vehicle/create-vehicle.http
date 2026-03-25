@@ -17,5 +17,6 @@ Authorization: Bearer {{token}}
   "color": "White",
   "fuelType": "Flex",
   "currentMileage": 45200,
+  "clientCode": "1",
   "notes": "Vehicle created via http file"
 }

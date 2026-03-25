@@ -52,6 +52,9 @@ public record VehicleRequest(
         @PositiveOrZero(message = "Current mileage must be zero or greater")
         Long currentMileage,
 
+        @Size(max = 255, message = "Client code must be less than 255 characters")
+        String clientCode,
+
         @Size(max = 500, message = "Notes must be less than 500 characters")
         String notes
 ) {

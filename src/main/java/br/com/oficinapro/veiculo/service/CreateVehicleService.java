@@ -1,6 +1,9 @@
 package br.com.oficinapro.veiculo.service;
 
+import br.com.oficinapro.cliente.domain.Client;
+import br.com.oficinapro.cliente.repository.ClientRepository;
 import br.com.oficinapro.common.exception.ResourceConflictException;
+import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import br.com.oficinapro.veiculo.domain.Vehicle;
 import br.com.oficinapro.veiculo.dto.request.VehicleRequest;
 import br.com.oficinapro.veiculo.dto.response.VehicleResponse;
@@ -14,10 +17,12 @@ public class CreateVehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
+    private final ClientRepository clientRepository;
 
-    public CreateVehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
+    public CreateVehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper, ClientRepository clientRepository) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
+        this.clientRepository = clientRepository;
     }
 
     @Transactional
@@ -27,6 +32,7 @@ public class CreateVehicleService {
         validateRenavamUniqueness(vehicleRequest.renavam());
 
         Vehicle vehicle = vehicleMapper.toEntity(vehicleRequest);
+        assignClient(vehicle, vehicleRequest.clientCode());
         normalizeOptionalFields(vehicle);
         applyDefaults(vehicle);
 
@@ -76,6 +82,18 @@ public class CreateVehicleService {
         if (vehicle.getCurrentMileage() == null) {
             vehicle.setCurrentMileage(0L);
         }
+    }
+
+    private void assignClient(Vehicle vehicle, String clientCode) {
+        if (isBlank(clientCode)) {
+            vehicle.setClient(null);
+            return;
+        }
+
+        Client client = clientRepository.findByCode(clientCode.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with code: " + clientCode));
+
+        client.addVehicle(vehicle);
     }
 
     private String normalize(String value) {

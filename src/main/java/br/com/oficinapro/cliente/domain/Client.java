@@ -1,14 +1,19 @@
 package br.com.oficinapro.cliente.domain;
 
 import br.com.oficinapro.common.audit.entity.BaseEntity;
+import br.com.oficinapro.veiculo.domain.Vehicle;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,5 +40,19 @@ public class Client extends BaseEntity {
     private String state;
     private String zipCode;
     private String observation;
+
+    @OneToMany(mappedBy = "client")
+    private Set<Vehicle> vehicles = new HashSet<>();
+
     private boolean enabled;
+
+    public void addVehicle(Vehicle vehicle) {
+        vehicles.add(vehicle);
+        vehicle.setClient(this);
+    }
+
+    public void removeVehicle(Vehicle vehicle) {
+        vehicles.remove(vehicle);
+        vehicle.setClient(null);
+    }
 }

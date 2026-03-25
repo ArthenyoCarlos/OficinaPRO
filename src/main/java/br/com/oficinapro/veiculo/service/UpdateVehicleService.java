@@ -1,5 +1,7 @@
 package br.com.oficinapro.veiculo.service;
 
+import br.com.oficinapro.cliente.domain.Client;
+import br.com.oficinapro.cliente.repository.ClientRepository;
 import br.com.oficinapro.common.exception.ResourceConflictException;
 import br.com.oficinapro.common.exception.ResourceNotFoundException;
 import br.com.oficinapro.veiculo.domain.Vehicle;
@@ -15,10 +17,12 @@ public class UpdateVehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
+    private final ClientRepository clientRepository;
 
-    public UpdateVehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
+    public UpdateVehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper, ClientRepository clientRepository) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
+        this.clientRepository = clientRepository;
     }
 
     @Transactional
@@ -31,6 +35,7 @@ public class UpdateVehicleService {
         updateRenavam(vehicle, vehicleRequest.renavam());
 
         vehicleMapper.updateEntity(vehicleRequest, vehicle);
+        assignClient(vehicle, vehicleRequest.clientCode());
         normalizeOptionalFields(vehicle);
         applyDefaults(vehicle);
 
@@ -100,6 +105,32 @@ public class UpdateVehicleService {
         if (vehicle.getCurrentMileage() == null) {
             vehicle.setCurrentMileage(0L);
         }
+    }
+
+    private void assignClient(Vehicle vehicle, String clientCode) {
+        if (clientCode == null) {
+            return;
+        }
+
+        if (clientCode.trim().isEmpty()) {
+            if (vehicle.getClient() != null) {
+                vehicle.getClient().removeVehicle(vehicle);
+            }
+            return;
+        }
+
+        Client client = clientRepository.findByCode(clientCode.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found with code: " + clientCode));
+
+        if (vehicle.getClient() != null && vehicle.getClient().getId().equals(client.getId())) {
+            return;
+        }
+
+        if (vehicle.getClient() != null) {
+            vehicle.getClient().removeVehicle(vehicle);
+        }
+
+        client.addVehicle(vehicle);
     }
 
     private String normalize(String value) {

@@ -1,8 +1,12 @@
 package br.com.oficinapro.veiculo.domain;
 
 import br.com.oficinapro.common.audit.entity.BaseEntity;
+import br.com.oficinapro.cliente.domain.Client;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +46,10 @@ public class Vehicle extends BaseEntity {
     private Long currentMileage;
 
     private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     private boolean enabled = true;
 }

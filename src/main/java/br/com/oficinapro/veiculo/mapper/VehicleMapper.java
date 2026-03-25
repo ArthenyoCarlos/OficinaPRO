@@ -16,6 +16,7 @@ public interface VehicleMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "client", ignore = true)
     Vehicle toEntity(VehicleRequest dto);
 
     @Mapping(target = "id", ignore = true)
@@ -24,6 +25,7 @@ public interface VehicleMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "client", ignore = true)
     void updateEntity(VehicleRequest dto, @MappingTarget Vehicle vehicle);
 
     VehicleResponse toResponse(Vehicle vehicle);
