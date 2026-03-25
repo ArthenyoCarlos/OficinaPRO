@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Update stock movement
+PUT {{baseUrl}}/api/v1/stock-movements/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productCode": "1",
+  "movementType": "EXIT",
+  "originType": "MANUAL_ADJUSTMENT",
+  "quantity": 5,
+  "previousBalance": 30,
+  "laterBalance": 25,
+  "unitCost": 15.50,
+  "notes": "Saida manual de estoque",
+  "movedByCode": "1"
+}

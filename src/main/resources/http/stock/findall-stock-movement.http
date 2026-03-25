@@ -1,0 +1,8 @@
+@baseUrl = http://localhost:8080
+@page = 0
+@size = 10
+
+### Find all stock movements
+GET {{baseUrl}}/api/v1/stock-movements?page={{page}}&size={{size}}
+Accept: application/json
+Authorization: Bearer {{token}}

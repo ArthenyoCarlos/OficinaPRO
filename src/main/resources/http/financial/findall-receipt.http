@@ -1,0 +1,8 @@
+@baseUrl = http://localhost:8080
+@page = 0
+@size = 10
+
+### Find all receipts
+GET {{baseUrl}}/api/v1/receipts?page={{page}}&size={{size}}
+Accept: application/json
+Authorization: Bearer {{token}}

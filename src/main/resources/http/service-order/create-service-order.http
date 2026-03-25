@@ -1,0 +1,54 @@
+@baseUrl = http://localhost:8080
+
+### Create service order
+POST {{baseUrl}}/api/v1/service-orders
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "clientCode": "10",
+  "vehicleCode": "1",
+  "responsibleTechnicianCode": "1",
+  "status": "OPEN",
+  "reportedProblem": "Motor falhando e consumo alto",
+  "diagnosis": "Necessita troca de velas e revisao de oleo",
+  "internalNotes": "Cliente autorizou avaliacao inicial",
+  "customerNotes": "Ligar antes de trocar pecas adicionais",
+  "entryMileage": 125000,
+  "fuelLevel": "1/2",
+  "accessories": "Macaco, chave de roda, estepe",
+  "discount": 20.00,
+  "totalParts": 150.00,
+  "totalServices": 120.00,
+  "totalAmount": 250.00,
+  "financialStatus": "PENDING",
+  "serviceItems": [
+    {
+      "serviceCode": "1",
+      "complementaryDescription": "Troca de oleo e filtro",
+      "quantity": 1,
+      "unitPrice": 120.00,
+      "discount": 0.00,
+      "totalAmount": 120.00,
+      "responsibleTechnicianCode": "1"
+    }
+  ],
+  "productItems": [
+    {
+      "productCode": "1",
+      "quantity": 3,
+      "unitPrice": 50.00,
+      "discount": 0.00,
+      "totalAmount": 150.00
+    }
+  ],
+  "receipts": [
+    {
+      "amount": 100.00,
+      "paymentMethod": "PIX",
+      "notes": "Sinal recebido",
+      "receivedByCode": "1"
+    }
+  ]
+}

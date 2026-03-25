@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Create stock movement
+POST {{baseUrl}}/api/v1/stock-movements
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productCode": "1",
+  "movementType": "ENTRY",
+  "originType": "MANUAL_ADJUSTMENT",
+  "quantity": 10,
+  "previousBalance": 20,
+  "laterBalance": 30,
+  "unitCost": 15.50,
+  "notes": "Entrada manual de estoque",
+  "movedByCode": "1"
+}

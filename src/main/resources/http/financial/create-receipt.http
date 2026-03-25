@@ -1,0 +1,15 @@
+@baseUrl = http://localhost:8080
+
+### Create receipt
+POST {{baseUrl}}/api/v1/receipts
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "serviceOrderCode": "1",
+  "amount": 150.00,
+  "paymentMethod": "PIX",
+  "notes": "Pagamento parcial",
+  "receivedByCode": "1"
+}
