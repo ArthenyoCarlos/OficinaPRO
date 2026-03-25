@@ -1,0 +1,21 @@
+@baseUrl = http://localhost:8080
+
+### Update vehicle
+PUT {{baseUrl}}/api/v1/vehicles/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "plate": "ABC1D23",
+  "chassis": "9BWZZZ377VT004251",
+  "renavam": "12345678901",
+  "brand": "Volkswagen",
+  "model": "Gol Track",
+  "manufactureYear": 2020,
+  "modelYear": 2021,
+  "color": "Silver",
+  "fuelType": "Flex",
+  "currentMileage": 47890,
+  "notes": "Vehicle updated via http file"
+}

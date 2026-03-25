@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 
-### Create user
-PATCH {{baseUrl}}/api/v1/user/1
+### Delete vehicle
+PATCH {{baseUrl}}/api/v1/vehicles/1
 Accept: application/json
 Authorization: Bearer {{token}}

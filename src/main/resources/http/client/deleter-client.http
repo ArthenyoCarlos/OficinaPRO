@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
 
 ### Delete Client
-DELETE {{baseUrl}}/api/v1/clients/1
+PATCH {{baseUrl}}/api/v1/clients/1
 Accept: application/json
 Authorization: Bearer {{token}}

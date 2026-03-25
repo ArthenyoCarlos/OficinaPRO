@@ -79,7 +79,7 @@ public class UserController {
     // Delete
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{code}")
+    @PatchMapping("/{code}")
     public ResponseEntity<Void> delete(@PathVariable String code){
         deleteUserService.delete(code);
         return ResponseEntity.noContent().build();
@@ -88,7 +88,7 @@ public class UserController {
     // Active
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/{code}/active")
+    @PatchMapping("/{code}/active")
     public ResponseEntity<Void> activate(@PathVariable String code){
         activateUserService.activateUser(code);
         return ResponseEntity.noContent().build();

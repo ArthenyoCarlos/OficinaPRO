@@ -77,7 +77,7 @@ public class ClientController {
     // Delete
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{code}")
+    @PatchMapping("/{code}")
     public ResponseEntity<Void> delete(@PathVariable String code){
         deleteClientService.delete(code);
         return ResponseEntity.noContent().build();
@@ -86,7 +86,7 @@ public class ClientController {
     // Active
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/{code}/active")
+    @PatchMapping("/{code}/active")
     public ResponseEntity<Void> activate(@PathVariable String code){
         activateClientService.activateUser(code);
         return ResponseEntity.noContent().build();
