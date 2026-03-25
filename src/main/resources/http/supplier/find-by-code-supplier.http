@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Find by code supplier
+GET {{baseUrl}}/api/v1/suppliers/1
+Accept: application/json
+Authorization: Bearer {{token}}
