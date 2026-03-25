@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Delete product
+PATCH {{baseUrl}}/api/v1/products/1
+Accept: application/json
+Authorization: Bearer {{token}}

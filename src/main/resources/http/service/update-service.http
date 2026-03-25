@@ -1,0 +1,15 @@
+@baseUrl = http://localhost:8080
+
+### Update service
+PUT {{baseUrl}}/api/v1/services/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Troca de oleo premium",
+  "category": "Mecanica",
+  "description": "Troca de oleo sintetico e filtro do motor",
+  "defaultPrice": 119.90,
+  "estimatedTimeMinutes": 60
+}

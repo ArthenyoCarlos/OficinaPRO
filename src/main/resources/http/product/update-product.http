@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Update product
+PUT {{baseUrl}}/api/v1/products/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Oleo 5W30 Sintetico",
+  "sku": "OLEO-5W30-001",
+  "categoryCode": "1",
+  "unit": "UN",
+  "costPrice": 28.90,
+  "salePrice": 44.90,
+  "currentStock": 45,
+  "minimumStock": 10,
+  "supplierCode": "1"
+}

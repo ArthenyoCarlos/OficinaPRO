@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:8080
+
+### Activate product
+PATCH {{baseUrl}}/api/v1/products/1/active
+Accept: application/json
+Authorization: Bearer {{token}}

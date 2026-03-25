@@ -1,0 +1,19 @@
+@baseUrl = http://localhost:8080
+
+### Create product
+POST {{baseUrl}}/api/v1/products
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Oleo 5W30",
+  "sku": "OLEO-5W30-001",
+  "categoryCode": "1",
+  "unit": "UN",
+  "costPrice": 25.90,
+  "salePrice": 39.90,
+  "currentStock": 50,
+  "minimumStock": 10,
+  "supplierCode": "1"
+}

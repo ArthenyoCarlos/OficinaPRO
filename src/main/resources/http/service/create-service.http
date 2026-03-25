@@ -1,0 +1,15 @@
+@baseUrl = http://localhost:8080
+
+### Create service
+POST {{baseUrl}}/api/v1/services
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Troca de oleo",
+  "category": "Mecanica",
+  "description": "Troca de oleo e filtro do motor",
+  "defaultPrice": 89.90,
+  "estimatedTimeMinutes": 45
+}
