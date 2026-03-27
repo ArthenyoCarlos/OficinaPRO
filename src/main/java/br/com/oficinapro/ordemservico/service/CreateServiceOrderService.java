@@ -46,6 +46,7 @@ public class CreateServiceOrderService {
     private final ProductRepository productRepository;
     private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
     private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
+    private final ServiceOrderPricingService serviceOrderPricingService;
 
     public CreateServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                      ServiceOrderMapper serviceOrderMapper,
@@ -55,7 +56,8 @@ public class CreateServiceOrderService {
                                      ServicesRepository servicesRepository,
                                      ProductRepository productRepository,
                                      ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
-                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
+                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService,
+                                     ServiceOrderPricingService serviceOrderPricingService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.serviceOrderMapper = serviceOrderMapper;
         this.clientRepository = clientRepository;
@@ -65,6 +67,7 @@ public class CreateServiceOrderService {
         this.productRepository = productRepository;
         this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
         this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
+        this.serviceOrderPricingService = serviceOrderPricingService;
     }
 
     @Transactional
@@ -79,7 +82,7 @@ public class CreateServiceOrderService {
         serviceOrder.setServiceItems(mapServiceItems(request.serviceItems(), serviceOrder));
         serviceOrder.setProductItems(mapProductItems(request.productItems(), serviceOrder));
         serviceOrder.setReceipts(mapReceipts(request.receipts(), serviceOrder));
-        calculateTotals(serviceOrder, request);
+        serviceOrderPricingService.calculate(serviceOrder, request);
         serviceOrderReceiptValidationService.validateServiceOrderReceipts(serviceOrder);
         serviceOrderFinancialStatusService.recalculate(serviceOrder);
         serviceOrder.setStatusHistory(buildInitialStatusHistory(serviceOrder));
@@ -192,23 +195,6 @@ public class CreateServiceOrderService {
 
         return userRepository.findByCode(code.trim())
                 .orElseThrow(() -> new ResourceNotFoundException(fieldName + " user not found with code: " + code));
-    }
-
-    private void calculateTotals(ServiceOrder serviceOrder, ServiceOrderRequest request) {
-        BigDecimal totalServices = serviceOrder.getServiceItems().stream()
-                .map(ServiceOrderServiceItem::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalParts = serviceOrder.getProductItems().stream()
-                .map(ServiceOrderProductItem::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal discount = defaultZero(request.discount());
-
-        serviceOrder.setDiscount(discount);
-        serviceOrder.setTotalServices(totalServices);
-        serviceOrder.setTotalParts(totalParts);
-        serviceOrder.setTotalAmount(totalServices.add(totalParts).subtract(discount).max(BigDecimal.ZERO));
     }
 
     private BigDecimal resolveServiceUnitPrice(ServiceOrderServiceItemRequest request, Services service) {

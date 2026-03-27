@@ -4,6 +4,7 @@ import br.com.oficinapro.financeiro.dto.response.ReceiptResponse;
 import br.com.oficinapro.financeiro.domain.enums.FinancialStatus;
 import br.com.oficinapro.ordemservico.domain.ServiceOrder;
 import br.com.oficinapro.ordemservico.domain.enums.ApprovalMethod;
+import br.com.oficinapro.ordemservico.domain.enums.ChargeType;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
 
 import java.math.BigDecimal;
@@ -31,7 +32,17 @@ public record ServiceOrderResponse(
         Long entryMileage,
         String fuelLevel,
         String accessories,
+        ChargeType chargeType,
+        BigDecimal subtotalParts,
+        BigDecimal subtotalServices,
+        BigDecimal subtotalAmount,
+        BigDecimal productsDiscountAmount,
+        BigDecimal productsDiscountPercent,
+        BigDecimal servicesDiscountAmount,
+        BigDecimal servicesDiscountPercent,
         BigDecimal discount,
+        BigDecimal totalDiscountAmount,
+        BigDecimal totalDiscountPercent,
         BigDecimal totalParts,
         BigDecimal totalServices,
         BigDecimal totalAmount,
@@ -71,7 +82,17 @@ public record ServiceOrderResponse(
                 entity.getEntryMileage(),
                 entity.getFuelLevel(),
                 entity.getAccessories(),
+                entity.getChargeType(),
+                entity.getSubtotalParts(),
+                entity.getSubtotalServices(),
+                entity.getSubtotalAmount(),
+                entity.getProductsDiscountAmount(),
+                entity.getProductsDiscountPercent(),
+                entity.getServicesDiscountAmount(),
+                entity.getServicesDiscountPercent(),
                 entity.getDiscount(),
+                entity.getDiscount(),
+                entity.getTotalDiscountPercent(),
                 entity.getTotalParts(),
                 entity.getTotalServices(),
                 entity.getTotalAmount(),

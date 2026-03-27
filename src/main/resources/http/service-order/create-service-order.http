@@ -17,7 +17,10 @@ Authorization: Bearer {{token}}
   "reportedProblem": "Motor falhando e consumo alto",
   "entryMileage": 125000,
   "fuelLevel": "1/2",
-  "discount": 0.00,
+  "chargeType": "FULL",
+  "productsDiscountPercent": 5.0,
+  "servicesDiscountAmount": 20.00,
+  "totalDiscountPercent": 10.0,
   "serviceItems": [
     {
       "serviceCode": "1",

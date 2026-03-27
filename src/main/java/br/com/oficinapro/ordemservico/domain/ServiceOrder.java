@@ -4,6 +4,7 @@ import br.com.oficinapro.auth.domain.User;
 import br.com.oficinapro.cliente.domain.Client;
 import br.com.oficinapro.common.audit.entity.BaseEntity;
 import br.com.oficinapro.financeiro.domain.Receipt;
+import br.com.oficinapro.ordemservico.domain.enums.ChargeType;
 import br.com.oficinapro.financeiro.domain.enums.FinancialStatus;
 import br.com.oficinapro.ordemservico.domain.enums.ApprovalMethod;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
@@ -84,6 +85,34 @@ public class ServiceOrder extends BaseEntity {
 
     @Column(name = "discount", precision = 19, scale = 2)
     private BigDecimal discount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "charge_type", nullable = false)
+    private ChargeType chargeType;
+
+    @Column(name = "subtotal_parts", precision = 19, scale = 2)
+    private BigDecimal subtotalParts;
+
+    @Column(name = "subtotal_services", precision = 19, scale = 2)
+    private BigDecimal subtotalServices;
+
+    @Column(name = "subtotal_amount", precision = 19, scale = 2)
+    private BigDecimal subtotalAmount;
+
+    @Column(name = "products_discount_amount", precision = 19, scale = 2)
+    private BigDecimal productsDiscountAmount;
+
+    @Column(name = "products_discount_percent", precision = 10, scale = 4)
+    private BigDecimal productsDiscountPercent;
+
+    @Column(name = "services_discount_amount", precision = 19, scale = 2)
+    private BigDecimal servicesDiscountAmount;
+
+    @Column(name = "services_discount_percent", precision = 10, scale = 4)
+    private BigDecimal servicesDiscountPercent;
+
+    @Column(name = "total_discount_percent", precision = 10, scale = 4)
+    private BigDecimal totalDiscountPercent;
 
     @Column(name = "total_parts", precision = 19, scale = 2)
     private BigDecimal totalParts;

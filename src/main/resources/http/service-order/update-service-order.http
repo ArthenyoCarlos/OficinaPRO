@@ -21,7 +21,8 @@ Authorization: Bearer {{token}}
   "diagnosis": "Troca de velas em andamento",
   "entryMileage": 125000,
   "fuelLevel": "1/2",
-  "discount": 10.00,
+  "chargeType": "ONLY_PRODUCTS",
+  "productsDiscountPercent": 10.0,
   "serviceItems": [
     {
       "serviceCode": "1",
@@ -56,7 +57,9 @@ Authorization: Bearer {{token}}
   "diagnosis": "Orcamento montado e aguardando aprovacao do cliente",
   "entryMileage": 125000,
   "fuelLevel": "1/2",
-  "discount": 10.00,
+  "chargeType": "FULL",
+  "servicesDiscountPercent": 15.0,
+  "totalDiscountAmount": 25.00,
   "serviceItems": [
     {
       "serviceCode": "1",

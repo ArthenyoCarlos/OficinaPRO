@@ -48,6 +48,7 @@ public class UpdateServiceOrderService {
     private final ServiceOrderStockService serviceOrderStockService;
     private final ServiceOrderFinancialStatusService serviceOrderFinancialStatusService;
     private final ServiceOrderReceiptValidationService serviceOrderReceiptValidationService;
+    private final ServiceOrderPricingService serviceOrderPricingService;
 
     public UpdateServiceOrderService(ServiceOrderRepository serviceOrderRepository,
                                      ServiceOrderMapper serviceOrderMapper,
@@ -58,7 +59,8 @@ public class UpdateServiceOrderService {
                                      ProductRepository productRepository,
                                      ServiceOrderStockService serviceOrderStockService,
                                      ServiceOrderFinancialStatusService serviceOrderFinancialStatusService,
-                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService) {
+                                     ServiceOrderReceiptValidationService serviceOrderReceiptValidationService,
+                                     ServiceOrderPricingService serviceOrderPricingService) {
         this.serviceOrderRepository = serviceOrderRepository;
         this.serviceOrderMapper = serviceOrderMapper;
         this.clientRepository = clientRepository;
@@ -69,6 +71,7 @@ public class UpdateServiceOrderService {
         this.serviceOrderStockService = serviceOrderStockService;
         this.serviceOrderFinancialStatusService = serviceOrderFinancialStatusService;
         this.serviceOrderReceiptValidationService = serviceOrderReceiptValidationService;
+        this.serviceOrderPricingService = serviceOrderPricingService;
     }
 
     @Transactional
@@ -89,7 +92,7 @@ public class UpdateServiceOrderService {
         if (request.receipts() != null) {
             replaceReceipts(serviceOrder, request.receipts());
         }
-        calculateTotals(serviceOrder, request);
+        serviceOrderPricingService.calculate(serviceOrder, request);
         serviceOrderReceiptValidationService.validateServiceOrderReceipts(serviceOrder);
         serviceOrderFinancialStatusService.recalculate(serviceOrder);
         normalizeFields(serviceOrder);
@@ -214,23 +217,6 @@ public class UpdateServiceOrderService {
 
         return userRepository.findByCode(code.trim())
                 .orElseThrow(() -> new ResourceNotFoundException(fieldName + " user not found with code: " + code));
-    }
-
-    private void calculateTotals(ServiceOrder serviceOrder, ServiceOrderRequest request) {
-        BigDecimal totalServices = serviceOrder.getServiceItems().stream()
-                .map(ServiceOrderServiceItem::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalParts = serviceOrder.getProductItems().stream()
-                .map(ServiceOrderProductItem::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal discount = defaultZero(request.discount());
-
-        serviceOrder.setDiscount(discount);
-        serviceOrder.setTotalServices(totalServices);
-        serviceOrder.setTotalParts(totalParts);
-        serviceOrder.setTotalAmount(totalServices.add(totalParts).subtract(discount).max(BigDecimal.ZERO));
     }
 
     private BigDecimal resolveServiceUnitPrice(ServiceOrderServiceItemRequest request, Services service) {

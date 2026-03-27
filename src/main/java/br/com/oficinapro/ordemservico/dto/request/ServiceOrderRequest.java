@@ -1,7 +1,9 @@
 package br.com.oficinapro.ordemservico.dto.request;
 
+import br.com.oficinapro.ordemservico.domain.enums.ChargeType;
 import br.com.oficinapro.ordemservico.domain.enums.ApprovalMethod;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -53,8 +55,31 @@ public record ServiceOrderRequest(
         @Size(max = 2000, message = "Accessories must be less than 2000 characters")
         String accessories,
 
+        ChargeType chargeType,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Products discount amount must be zero or greater")
+        BigDecimal productsDiscountAmount,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Products discount percent must be zero or greater")
+        @DecimalMax(value = "100.0", inclusive = true, message = "Products discount percent must be less than or equal to 100")
+        BigDecimal productsDiscountPercent,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Services discount amount must be zero or greater")
+        BigDecimal servicesDiscountAmount,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Services discount percent must be zero or greater")
+        @DecimalMax(value = "100.0", inclusive = true, message = "Services discount percent must be less than or equal to 100")
+        BigDecimal servicesDiscountPercent,
+
         @DecimalMin(value = "0.0", inclusive = true, message = "Discount must be zero or greater")
         BigDecimal discount,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Total discount amount must be zero or greater")
+        BigDecimal totalDiscountAmount,
+
+        @DecimalMin(value = "0.0", inclusive = true, message = "Total discount percent must be zero or greater")
+        @DecimalMax(value = "100.0", inclusive = true, message = "Total discount percent must be less than or equal to 100")
+        BigDecimal totalDiscountPercent,
 
         @Size(max = 255, message = "Approved by code must be less than 255 characters")
         String approvedByCode,
