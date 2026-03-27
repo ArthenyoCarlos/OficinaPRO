@@ -1,7 +1,9 @@
 @baseUrl = http://localhost:8080
 @serviceOrderCode = 1
+@serviceOrderNumber = OS-1774544009950
 
 ### Find by code service order
+### Use serviceOrderCode in the URL. serviceOrderNumber is only the visible OS number.
 GET {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}
 Accept: application/json
 Authorization: Bearer {{token}}

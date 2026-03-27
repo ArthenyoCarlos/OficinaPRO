@@ -17,6 +17,7 @@ public interface ServiceOrderMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "openedAt", ignore = true)
     @Mapping(target = "client", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "responsibleTechnician", ignore = true)

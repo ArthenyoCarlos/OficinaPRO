@@ -1,9 +1,11 @@
 @baseUrl = http://localhost:8080
 @serviceOrderCode = 1
+@serviceOrderNumber = OS-1774544009950
 @userCode = 1
 
 ### Cancel service order
 ### If the order is FINISHED, this action returns the products to stock
+### Use serviceOrderCode in the URL. serviceOrderNumber is only the visible OS number.
 PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/cancel
 Content-Type: application/json
 Accept: application/json

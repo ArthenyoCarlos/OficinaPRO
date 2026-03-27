@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:8080
-@username = admin
-@password = 123456
+@username = arthenyo
+@password = arthenyo
 
 ### Login
 POST {{baseUrl}}/auth/signin

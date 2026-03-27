@@ -1,10 +1,12 @@
 @baseUrl = http://localhost:8080
 @serviceOrderCode = 1
+@serviceOrderNumber = OS-1774544009950
 @clientCode = 1
 @vehicleCode = 1
 @userCode = 1
 
 ### Update service order
+### Use serviceOrderCode in the URL. serviceOrderNumber is only the visible OS number.
 PUT {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}
 Content-Type: application/json
 Accept: application/json
@@ -17,11 +19,8 @@ Authorization: Bearer {{token}}
   "status": "IN_PROGRESS",
   "reportedProblem": "Motor falhando e consumo alto",
   "diagnosis": "Troca de velas em andamento",
-  "internalNotes": "Aguardando teste final",
-  "customerNotes": "Cliente deseja retirar hoje",
   "entryMileage": 125000,
   "fuelLevel": "1/2",
-  "accessories": "Macaco, chave de roda, estepe",
   "discount": 10.00,
   "serviceItems": [
     {
@@ -38,13 +37,40 @@ Authorization: Bearer {{token}}
       "quantity": 3,
       "discount": 10.00
     }
-  ],
-  "receipts": [
+  ]
+}
+
+### Move service order to WAITING_APPROVAL
+### Use this before PATCH /approve when the OS is currently IN_PROGRESS
+PUT {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "clientCode": "{{clientCode}}",
+  "vehicleCode": "{{vehicleCode}}",
+  "responsibleTechnicianCode": "{{userCode}}",
+  "status": "WAITING_APPROVAL",
+  "reportedProblem": "Motor falhando e consumo alto",
+  "diagnosis": "Orcamento montado e aguardando aprovacao do cliente",
+  "entryMileage": 125000,
+  "fuelLevel": "1/2",
+  "discount": 10.00,
+  "serviceItems": [
     {
-      "amount": 100.00,
-      "paymentMethod": "PIX",
-      "notes": "Sinal recebido",
-      "receivedByCode": "{{userCode}}"
+      "serviceCode": "1",
+      "complementaryDescription": "Troca de oleo e filtro",
+      "quantity": 1,
+      "discount": 0.00,
+      "responsibleTechnicianCode": "{{userCode}}"
+    }
+  ],
+  "productItems": [
+    {
+      "productCode": "1",
+      "quantity": 3,
+      "discount": 10.00
     }
   ]
 }

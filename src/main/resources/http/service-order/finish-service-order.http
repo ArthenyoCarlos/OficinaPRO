@@ -1,9 +1,12 @@
 @baseUrl = http://localhost:8080
 @serviceOrderCode = 1
+@serviceOrderNumber = OS-1774544009950
 @userCode = 1
 
 ### Finish service order
 ### This action performs the stock output for product items
+### Optionally inform payment data to create a receipt during finish
+### Use serviceOrderCode in the URL. serviceOrderNumber is only the visible OS number.
 PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/finish
 Content-Type: application/json
 Accept: application/json
@@ -11,5 +14,9 @@ Authorization: Bearer {{token}}
 
 {
   "changedByCode": "{{userCode}}",
+  "receiptAmount": 100.00,
+  "paymentMethod": "PIX",
+  "receiptNotes": "Pagamento recebido na finalizacao",
+  "receivedByCode": "{{userCode}}",
   "notes": "Servico finalizado e pronto para retirada"
 }

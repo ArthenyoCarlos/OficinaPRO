@@ -1,6 +1,7 @@
 package br.com.oficinapro.financeiro.service;
 
 import br.com.oficinapro.financeiro.domain.enums.FinancialStatus;
+import br.com.oficinapro.financeiro.domain.Receipt;
 import br.com.oficinapro.financeiro.repository.ReceiptRepository;
 import br.com.oficinapro.ordemservico.domain.ServiceOrder;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
@@ -38,9 +39,7 @@ public class ServiceOrderFinancialStatusService {
         }
 
         BigDecimal totalAmount = defaultZero(serviceOrder.getTotalAmount());
-        BigDecimal receivedAmount = serviceOrder.getId() == null
-                ? BigDecimal.ZERO
-                : defaultZero(receiptRepository.sumAmountByServiceOrderId(serviceOrder.getId()));
+        BigDecimal receivedAmount = resolveReceivedAmount(serviceOrder);
 
         if (totalAmount.compareTo(BigDecimal.ZERO) == 0) {
             return FinancialStatus.PAID;
@@ -55,6 +54,25 @@ public class ServiceOrderFinancialStatusService {
         }
 
         return FinancialStatus.PAID;
+    }
+
+    private BigDecimal resolveReceivedAmount(ServiceOrder serviceOrder) {
+        BigDecimal inMemoryAmount = serviceOrder.getReceipts() == null
+                ? BigDecimal.ZERO
+                : serviceOrder.getReceipts().stream()
+                .map(Receipt::getAmount)
+                .map(this::defaultZero)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (serviceOrder.getId() == null) {
+            return inMemoryAmount;
+        }
+
+        if (inMemoryAmount.compareTo(BigDecimal.ZERO) > 0) {
+            return inMemoryAmount;
+        }
+
+        return defaultZero(receiptRepository.sumAmountByServiceOrderId(serviceOrder.getId()));
     }
 
     private BigDecimal defaultZero(BigDecimal value) {

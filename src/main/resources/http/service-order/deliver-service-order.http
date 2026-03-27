@@ -1,9 +1,11 @@
 @baseUrl = http://localhost:8080
 @serviceOrderCode = 1
+@serviceOrderNumber = OS-1774544009950
 @userCode = 1
 
 ### Deliver service order
-### Use only when the order is already FINISHED
+### Use only when the order is already FINISHED and financial status is PAID
+### Use serviceOrderCode in the URL. serviceOrderNumber is only the visible OS number.
 PATCH {{baseUrl}}/api/v1/service-orders/{{serviceOrderCode}}/deliver
 Content-Type: application/json
 Accept: application/json

@@ -4,6 +4,7 @@ import br.com.oficinapro.auth.domain.User;
 import br.com.oficinapro.auth.reposirory.UserRepository;
 import br.com.oficinapro.common.exception.BusinessException;
 import br.com.oficinapro.common.exception.ResourceNotFoundException;
+import br.com.oficinapro.financeiro.domain.enums.FinancialStatus;
 import br.com.oficinapro.ordemservico.domain.ServiceOrder;
 import br.com.oficinapro.ordemservico.domain.ServiceOrderStatusHistory;
 import br.com.oficinapro.ordemservico.domain.enums.ServiceOrderStatus;
@@ -32,6 +33,7 @@ public class DeliverServiceOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Service order not found with code: " + code));
 
         validateTransition(serviceOrder.getStatus(), ServiceOrderStatus.DELIVERED);
+        validateFinancialStatus(serviceOrder);
 
         User changedBy = findUserByCode(request.changedByCode(), "Changed by");
         var previousStatus = serviceOrder.getStatus();
@@ -48,6 +50,12 @@ public class DeliverServiceOrderService {
         }
         if (!currentStatus.canTransitionTo(targetStatus)) {
             throw new BusinessException("Invalid status transition from " + currentStatus + " to " + targetStatus);
+        }
+    }
+
+    private void validateFinancialStatus(ServiceOrder serviceOrder) {
+        if (serviceOrder.getFinancialStatus() != FinancialStatus.PAID) {
+            throw new BusinessException("Service order can only be delivered when financial status is PAID");
         }
     }
 

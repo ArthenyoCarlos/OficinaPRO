@@ -77,11 +77,12 @@ public class UpdateServiceOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Service order not found with code: " + code));
 
         var previousStatus = serviceOrder.getStatus();
+        var originalOpenedAt = serviceOrder.getOpenedAt();
         validateStatusTransition(previousStatus, request.status());
         validateFinishedOrderRestrictions(previousStatus, request);
 
         serviceOrderMapper.updateEntity(request, serviceOrder);
-        serviceOrder.setOpenedAt(request.openedAt() != null ? request.openedAt() : serviceOrder.getOpenedAt());
+        serviceOrder.setOpenedAt(request.openedAt() != null ? request.openedAt() : originalOpenedAt);
         assignMainReferences(serviceOrder, request);
         replaceServiceItems(serviceOrder, request.serviceItems());
         replaceProductItems(serviceOrder, request.productItems());

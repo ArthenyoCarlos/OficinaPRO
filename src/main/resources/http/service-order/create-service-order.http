@@ -15,35 +15,20 @@ Authorization: Bearer {{token}}
   "responsibleTechnicianCode": "{{userCode}}",
   "status": "OPEN",
   "reportedProblem": "Motor falhando e consumo alto",
-  "diagnosis": "Necessita troca de velas e revisao de oleo",
-  "internalNotes": "Cliente autorizou avaliacao inicial",
-  "customerNotes": "Ligar antes de trocar pecas adicionais",
   "entryMileage": 125000,
   "fuelLevel": "1/2",
-  "accessories": "Macaco, chave de roda, estepe",
-  "discount": 20.00,
+  "discount": 0.00,
   "serviceItems": [
     {
       "serviceCode": "1",
-      "complementaryDescription": "Troca de oleo e filtro",
       "quantity": 1,
-      "discount": 0.00,
       "responsibleTechnicianCode": "{{userCode}}"
     }
   ],
   "productItems": [
     {
       "productCode": "1",
-      "quantity": 3,
-      "discount": 0.00
-    }
-  ],
-  "receipts": [
-    {
-      "amount": 100.00,
-      "paymentMethod": "PIX",
-      "notes": "Sinal recebido",
-      "receivedByCode": "{{userCode}}"
+      "quantity": 1
     }
   ]
 }
